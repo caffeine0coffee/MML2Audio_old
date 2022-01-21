@@ -10,12 +10,14 @@ public class ChannelBuilder {
     private int currentVolume;
     private int currentOctave;
     private int currentDefaultToneLength;
+    private int currentWaveGeneratorId;
 
     public ChannelBuilder(Channel channel) {
         this.channel = channel;
         this.currentOctave = 4;
         this.currentVolume = 200;
         this.currentDefaultToneLength = 4;
+        this.currentWaveGeneratorId = 0;
     }
 
     public void setChannel(Channel channel) {
@@ -47,24 +49,27 @@ public class ChannelBuilder {
         // System.out.println("set Default Tone Length to: " + this.currentDefaultToneLength);
     }
 
+    public void setCurrentWaveGeneratorId(int id) {
+        this.currentWaveGeneratorId = id;
+    }
+
     public Channel getChannel() {
         return this.channel;
     }
     
     public void addNote(String noteExpr) {
-        Pattern pt = Pattern.compile("(\\d+)(.*)");
-        Matcher mc = pt.matcher(noteExpr);
+        Pattern noteLengthPattern = Pattern.compile("(\\d+)(.*)");
+        Matcher noteLengthMatcher = noteLengthPattern.matcher(noteExpr);
         Note note = null;
 
-        if (mc.find()) {
-            note = new Note(mc.group(2), Integer.parseInt(mc.group(1)), this.currentOctave, this.currentVolume);
+        if (noteLengthMatcher.find()) {
+            note = new Note(noteLengthMatcher.group(2), Integer.parseInt(noteLengthMatcher.group(1)), this.currentOctave, this.currentVolume, this.currentWaveGeneratorId);
         }
         else {
-            note = new Note(noteExpr, this.currentDefaultToneLength, this.currentOctave, this.currentVolume);
+            note = new Note(noteExpr, this.currentDefaultToneLength, this.currentOctave, this.currentVolume, this.currentWaveGeneratorId);
         }
         this.channel.addNote(note);
 
         // System.out.println("Note added: " + note);
     }
-
 }

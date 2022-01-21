@@ -30,8 +30,11 @@ public class NoteNameConverter {
     }
 
     public static int noteNameToScaleIndex(String noteName) throws InvalidNoteNameException {
-        if (! Pattern.matches("^[A-Ga-g][#+-]?$", noteName)) {
+        if (! Pattern.matches("^[A-Ga-gR][#+-]?$", noteName)) {
             throw new InvalidNoteNameException();
+        }
+        if (Pattern.matches("R", noteName)) {
+            return 0;
         }
 
         String scaleName = String.valueOf(noteName.charAt(0));

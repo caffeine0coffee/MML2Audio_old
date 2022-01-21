@@ -91,15 +91,15 @@ public class MmlReader {
                     while (!finish) {
                         finish = true;
                         if (matcher.find()) {
-                            // System.out.println("matched Pattern: " + ent.getKey());
-                            // System.out.println("  argument: " + matcher.group(1));
-                            // System.out.println("  start index: " + matcher.start());
-
                             String matcherGroup = matcher.groupCount()>0 ? matcher.group(1) : "";
                             String arg = new String(matcherGroup);
                             int start = matcher.start();
                             taskQueue.add(new Task(start,
                                 ()->{ ent.getValue().accept(arg, builder); }));
+
+                            // System.out.println("matched Pattern: " + ent.getKey());
+                            // System.out.println("  argument: " + matcherGroup);
+                            // System.out.println("  start index: " + start);
 
                             finish = false;
                             if (matcher.hitEnd()) {
@@ -195,7 +195,7 @@ public class MmlReader {
 
         MmlReader.operationMap = new HashMap<Pattern, BiConsumer<String, ChannelBuilder>>();
         // ノート表現
-        MmlReader.operationMap.put(Pattern.compile("(\\d*[A-Ga-g][#+-]?)"), // 8A 16F など
+        MmlReader.operationMap.put(Pattern.compile("(\\d*[A-Ga-gR][#+-]?)"), // 8A 16F など
             (String arg, ChannelBuilder cb)->{
                 cb.addNote(arg);
             });
@@ -229,6 +229,11 @@ public class MmlReader {
         MmlReader.operationMap.put(Pattern.compile("L(\\d+)"),  //  L<number>
             (String arg, ChannelBuilder cb)->{
                 cb.setCurrentDefaultToneLength(Integer.parseInt(arg));
+            });
+        // 音色
+        MmlReader.operationMap.put(Pattern.compile("@(\\d+)"),  // @<number>
+            (String arg, ChannelBuilder cb)->{
+                cb.setCurrentWaveGeneratorId(Integer.parseInt(arg));
             });
 
         // template

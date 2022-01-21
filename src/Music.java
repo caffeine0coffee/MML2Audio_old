@@ -4,6 +4,7 @@ import java.util.Arrays;
 import javax.sound.sampled.AudioFormat;
 
 import Channel.Channel;
+import Exception.InvalidGeneratorId;
 import Note.Note;
 
 public class Music {
@@ -49,6 +50,10 @@ public class Music {
         return this.channelList;
     }
 
+    public void setBpm(int bpm) {
+        this.bpm = bpm;
+    }
+
     public void addChannel(Channel channel) {
         this.channelList.add(channel);
     }
@@ -63,27 +68,22 @@ public class Music {
 
         byte[] audioBuffer = new byte[numOfByte];
         Arrays.fill(audioBuffer, (byte)0);
-        int attackTime = (int) (Music.SAMPLE_RATE * 0.02);
+        int attackTime = (int) (Music.SAMPLE_RATE * 0.01);
         int decreaseTime = (int) (Music.SAMPLE_RATE * 0.1);
 
         for (int c=0; c<this.getNumberOfChannel(); c++) {
             int phase = 0; // 波の位相
-            int noteIndex = -1;
-            double waveLength = 0;
-            int noteLength = 0; // in [samples]
             int count = 0;
-            int volume = 0;
-            byte value = 0;
-            Note note;
+            int noteIndex = -1;
+            double preampValue = 0;
+            double amp = 0;
+            Note note = null;
             for (int i=0; i<audioBuffer.length; i++) {
                 if (count <= 0) {
                     noteIndex++;
                     if (noteIndex < channelList.get(c).getNoteList().size()) {
                         note = channelList.get(c).getNoteList().get(noteIndex);
-                        waveLength = Music.SAMPLE_RATE / note.getFreq();
-                        noteLength = (int) ((4.0 / note.getToneLength()) * (60.0 / bpm) * Music.SAMPLE_RATE);
-                        volume = note.getVolume();
-                        count = noteLength;
+                        count = (int) ((4.0 / note.getToneLength()) * (60.0 / bpm) * Music.SAMPLE_RATE);
                         phase = 0;
                     }
                     else {
@@ -91,20 +91,28 @@ public class Music {
                     }
                 }
 
-                double amp = this.maxVolumeValue * 0.5 * (volume / (double)Note.MAX_VOLUME);
+                amp = this.maxVolumeValue * 0.5 * (note.getVolume() / (double)Note.MAX_VOLUME);
                 amp /= (double) this.getNumberOfChannel();
-                value = (byte) (amp * Math.sin((phase/waveLength)*Math.PI*2));
-
                 // 音のアタックを付ける
                 if (phase < attackTime) {
-                    value *= (phase / (double)attackTime);
+                    amp *= (phase / (double)attackTime);
                 }
                 // 音の終端で減衰させる
                 if (count < decreaseTime) {
-                    value *= (count / (double)decreaseTime);
+                    amp *= (count / (double)decreaseTime);
                 }
 
-                audioBuffer[i] += value;
+                // value = (byte) (WaveGenerator.sin(note.getFreq(), phase/Music.SAMPLE_RATE) * amp);
+                try {
+                    preampValue = WaveGenerator.getWaveGenerator(note.getWaveGeneratorId()).apply(
+                        note.getFreq(), phase/Music.SAMPLE_RATE);
+                }
+                catch (InvalidGeneratorId e) {
+                    e.printStackTrace();
+                }
+
+                // value = (byte) (amp * Math.sin((phase/waveLength)*Math.PI*2));
+                audioBuffer[i] += (byte) (preampValue * amp);
 
                 count--;
                 phase++;
@@ -116,9 +124,5 @@ public class Music {
 
     public AudioFormat getAudioFormat() {
         return audioFormat;
-    }
-
-    public void setBpm(int bpm) {
-        this.bpm = bpm;
     }
 }

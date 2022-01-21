@@ -11,16 +11,18 @@ public class Note {
     private int octave;
     private int toneLength;
     private int volume;  // 0 ~ MAX_VOLUME
+    private int waveGeneratorId;
     private String noteName;
 
-    public Note(int toneLength, int octave, int volume) {
+    public Note(int toneLength, int octave, int volume, int waveGeneratorId) {
         this.octave = octave;
         this.toneLength = toneLength;
         this.volume = volume;
+        this.waveGeneratorId = waveGeneratorId;
     }
 
-    public Note(int scaleIndex, int toneLength, int octave, int volume) {
-        this(toneLength, octave, volume);
+    public Note(int scaleIndex, int toneLength, int octave, int volume, int waveGeneratorId) {
+        this(toneLength, octave, volume, waveGeneratorId);
 
         try {
             this.noteName = NoteNameConverter.scaleIndexToNoteName(scaleIndex);
@@ -33,8 +35,8 @@ public class Note {
         calcFreq();
     }
 
-    public Note(String noteName, int toneLength, int octave, int volume) {
-        this(toneLength, octave, volume);
+    public Note(String noteName, int toneLength, int octave, int volume, int waveGeneratorId) {
+        this(toneLength, octave, volume, waveGeneratorId);
 
         try {
             this.scaleIndex = NoteNameConverter.noteNameToScaleIndex(noteName);
@@ -45,6 +47,10 @@ public class Note {
 
         this.noteName = noteName;
         calcFreq();
+
+        if (noteName.equals("R")) {
+            this.volume = 0;
+        }
     }
 
     private void calcFreq() {
@@ -69,6 +75,10 @@ public class Note {
         return volume;
     }
 
+    public int getWaveGeneratorId() {
+        return this.waveGeneratorId;
+    }
+
     @Override
     public String toString() {
         return "[ "
@@ -76,7 +86,8 @@ public class Note {
             + "index=" + this.scaleIndex + ", "
             + "octave=" + this.octave + ", "
             + "toneLength=" + this.toneLength + ", "
-            + "freq=" + this.freq
+            + "freq=" + this.freq + ", "
+            + "wave=" + this.waveGeneratorId + " "
             + "]";
     }
 }

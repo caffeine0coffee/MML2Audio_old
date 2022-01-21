@@ -18,11 +18,19 @@ MML規定
 チャンネル     : 「:<channel name>」で指定
 テンポ         : T<bpm>で指定
 デフォルト音長 : L<number>で指定
+
+音色
+	@<number> waveGeneratorIdが入る
+		0: sin波
+		1: 矩形波
+		2: のこぎり波
+		10: ノイズ
  
 音量
-   V<number> : 音量指定 0~127
+	V<number> : 音量指定 0~127
 	(<number> : 指定音量上げる
 	)<number> : 指定音量下げる
+
 
 区切り文字: 「|」
 	可視性の為だけに使う Readerでは無視する
@@ -31,17 +39,22 @@ MML規定
 T100
 
 :lead
-O5 L8
-C > B A G < D C > B < D | 4C 4E 2C
+O5 L8 V90 @2
+C>BAG <DC>B<D | 4C4E 2C
 
 :bass
-O2
+O3 V110
 2F 2G | < 2C 2C
 
 :arpeggio
-O6 L32 V100
-F A < C E G E C > A F A < C E G E C > A
-G B < D F A F D > B G B < D F A F D > B
-< B G E C > G < E C > G
-< G E C > G E < E C > G
-< C
+O6 L32 V70 @1
+FA<CEGEC>A FA<CEGEC>A
+GB<DFAFD>B GB<DFAFD>B
+<BGEC>G<EC>G <GEC>GE<EC>G
+<C
+
+:drum
+V80 @10
+L32 CCCC L16 CR RR CR
+L32 CCCC L16 CR RR CR
+CRRR CRRR C
